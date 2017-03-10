@@ -4,12 +4,14 @@ package radarComponent;
  * Created by Tushar on 08/03/17.
  */
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.location.Location;
 import android.util.AttributeSet;
@@ -62,7 +64,7 @@ public class Radar extends View {
     private  int pinsColor ;
     private  int centerPinColor ;
     private  int backgroundColor;
-
+    private Matrix transform;
 
     public Radar(Context context) {
         this(context, null);
@@ -75,8 +77,8 @@ public class Radar extends View {
     public Radar(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         this.context = context;
-
-        referencePoint = new RadarPoint("example", 10.00000f,22.0000f);
+        transform = new Matrix();
+        referencePoint = new RadarPoint(getContext(),"example", 10.00000f,22.0000f,0);
 
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.radar, 0, 0);
 
@@ -112,6 +114,8 @@ public class Radar extends View {
 
         this.canvas = canvas;
         makeRadar();
+
+
     }
 
     public void refresh() {
@@ -150,7 +154,10 @@ public class Radar extends View {
 
         metterDistance = zoomDistance + (zoomDistance/16);
         if (metterDistance > maxDistance) metterDistance = maxDistance;
+        //this.canvas.save();
+        this.canvas.setMatrix(transform);
 
+       // this.canvas.rotate(180,10,10);
         drawPins(u0, locations, pxCanvas, metterDistance);
 
     }
@@ -184,7 +191,6 @@ public class Radar extends View {
         for (int i = 0; i < locations.size(); i++) {
 
             int distance = Math.round(distanceBetween(referenceLocation, locations.get(i)));
-
             if (distance > maxDistance) continue;
 
             int virtualDistance = 1;
@@ -192,12 +198,12 @@ public class Radar extends View {
                 virtualDistance = (distance * pxCanvas / metterDistance) ;
             }
 
-            int angle = rand.nextInt(360)+1;
+            //int angle = rand.nextInt(360)+1;
 
-            long cX = pxCanvas + Math.round(virtualDistance*Math.cos(angle*Math.PI/180));
-            long cY = pxCanvas + Math.round(virtualDistance*Math.sin(angle * Math.PI / 180));
+            long cX = pxCanvas + Math.round(virtualDistance*Math.cos(points.get(i).angle * Math.PI/ 180));
+            long cY = pxCanvas + Math.round(virtualDistance*Math.sin(points.get(i).angle * Math.PI / 180));
 
-            pinsInCanvas.add(new RadarPoint(points.get(i).identifier, cX, cY, getPinsRadius()));
+            pinsInCanvas.add(new RadarPoint(getContext(),points.get(i).identifier, cX, cY, getPinsRadius(),points.get(i).angle));
 
             if (pinsImage != 0) {
                 long pnt = cX - getPinsRadius();
@@ -206,8 +212,10 @@ public class Radar extends View {
             }else{
                 drawPin(cX, cY, getPinsColor(), getPinsRadius());
             }
+
         }
     }
+
 
 
     float distanceBetween(Location l1, Location l2)
@@ -231,19 +239,25 @@ public class Radar extends View {
     }
 
     public void drawImage(long x, long y, int image,int size){
+
+
         Bitmap myBitmap = BitmapFactory.decodeResource(getResources(), image);
 
         Bitmap scaledBitmap =  Bitmap.createScaledBitmap(myBitmap, size, size, true);
 
         canvas.drawBitmap( scaledBitmap, x, y, null);
+
     }
 
     public void drawPin(long x, long y, int Color,int radius){
+
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color);
         canvas.drawCircle(x, y, radius, paint);
+
     }
+
 
     public String getTouchedPin(MotionEvent event) {
 
@@ -315,4 +329,61 @@ public class Radar extends View {
     public void setReferencePoint(RadarPoint referencePoint) {
         this.referencePoint = referencePoint;
     }
+    public void translate(int progress) {
+
+        invalidate();
+        for (RadarPoint rPoint : pinsInCanvas) {
+            //progress =  Util.pxFromDp(this.getContext(),progress);
+            if (rPoint.angle < 90) {
+
+                transform.postTranslate((rPoint.x )/(getHeight()/2)+progress, (rPoint.y )/(getWidth()/2)+progress);
+
+            }
+
+            if (rPoint.angle == 90) {
+
+                transform.setTranslate((rPoint.x )/(getHeight()/2), (rPoint.y )/(getWidth()/2)-progress);
+
+            }
+
+            if (rPoint.angle > 90 && rPoint.angle < 180) {
+
+
+                transform.setTranslate((rPoint.x )/(getHeight()/2)-progress, (rPoint.y )/(getWidth()/2)+progress);
+
+
+
+            }
+
+            if (rPoint.angle == 180) {
+                transform.setTranslate((rPoint.x )/(getHeight()/2)-progress, (rPoint.y )/(getWidth()/2));
+
+            }
+
+            if (rPoint.angle > 180 && rPoint.angle < 270) {
+                transform.setTranslate((rPoint.x )/(getHeight()/2)-progress, (rPoint.y )/(getWidth()/2)-progress);
+
+
+            }
+
+            if (rPoint.angle == 270) {
+                transform.setTranslate((rPoint.x )/(getHeight()/2), (rPoint.y )/(getWidth()/2)-progress);
+
+            }
+
+            if (rPoint.angle > 270 && rPoint.angle < 360) {
+                transform.setTranslate((rPoint.x )/(getHeight()/2) + progress, (rPoint.y )/(getWidth()/2)-progress);
+
+            }
+
+            if (rPoint.angle == 0 || rPoint.angle == 360) {
+                transform.setTranslate((rPoint.x )/(getHeight()/2), (rPoint.y )/(getWidth()/2)+progress);
+
+            }
+
+        }
+        //
+
+    }
+
 }
