@@ -332,6 +332,7 @@ public class Radar extends View {
     public void translate(int progress) {
 
         invalidate();
+
         for (RadarPoint rPoint : pinsInCanvas) {
             //progress =  Util.pxFromDp(this.getContext(),progress);
             if (rPoint.angle < 90) {

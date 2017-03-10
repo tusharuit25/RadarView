@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:whatever="http://schemas.android.com/apk/res-auto"
+    xmlns:radar="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,15 +14,21 @@
         android:id="@+id/radar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        whatever:center_pin_radius="20"
-    whatever:pins_radius="20"
-    whatever:pins_color="@color/light_green"
-    whatever:center_pin_color="@color/colorAccent"
+        radar:center_pin_radius="20"
+        radar:pins_radius="20"
+        radar:pins_color="@color/light_green"
+        radar:center_pin_color="@color/colorAccent"
 
-    whatever:radar_image="@drawable/radar_background"
-    whatever:pins_image="@drawable/pin"
-    whatever:center_pin_image="@drawable/center_pin"
+        radar:radar_image="@drawable/radar_background"
+        radar:pins_image="@drawable/pin"
+        radar:center_pin_image="@drawable/center_pin"
 
-    whatever:max_distance="-1"
+        radar:max_distance="-1"
         />
+    <SeekBar
+        android:id="@+id/seekBar1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
